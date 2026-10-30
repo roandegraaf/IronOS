@@ -215,6 +215,7 @@
 #define USB_PD_VMAX          28 // Device supposedly can do 28V; looks like vmax is 33 ish
 #define OLED_128x32          1
 #define OLED_128x32_DENSE_UI 1 // Data dense detailed screens; fits in every language here
+#define OLED_128x32_HERO_UI  1 // Big-number hero layouts; takes precedence over DENSE on the screens it redesigns
 #define OLED_FLIP            1
 #define HAS_SPLIT_POWER_PATH 1
 #define TEMP_NTC             1
@@ -226,6 +227,9 @@
 #define HAS_POWER_DEBUG_MENU
 #define DEBUG_POWER_MENU_BUTTON_B
 
+// Older TS101 panel batches render shifted and cropped with the quirks below, so
+// they are opt-in: define TS101_OLED_NEW_PANEL only for the newer panel batch.
+#ifdef TS101_OLED_NEW_PANEL
 // This panel does not reliably refresh over the shared bulk 0x80-continuation I2C
 // transaction (I2C_CLASS::Transmit/writeRegistersBulk): it only ever refreshes the
 // top-left portion of the panel. Send each command/data chunk as its own I2C
@@ -234,6 +238,7 @@
 // This panel needs a non-zero, orientation-dependent SSD1306 vertical Display
 // Offset (0xD3); without it the image renders shifted by half the screen height.
 #define OLED_DISPLAY_OFFSET_QUIRK 1
+#endif /* TS101_OLED_NEW_PANEL */
 
 #endif /* TS101 */
 

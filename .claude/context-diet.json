@@ -1,0 +1,44 @@
+{
+  "_note": "written by context-diet on 2026-10-29; edit freely, an existing file is never regenerated except by /diet init",
+  "mcp": [
+    "Neon",
+    "afpunter-live",
+    "claude_ai_Higgsfield",
+    "higgsfield",
+    "figma",
+    "mobbin",
+    "monitorzz",
+    "plugin_firebase_firebase",
+    "plugin_stripe_stripe",
+    "coolify",
+    "claude_ai_Gmail",
+    "claude_ai_Google_Calendar",
+    "claude_ai_Google_Drive"
+  ],
+  "skills": [
+    "apple-design",
+    "apple-hig",
+    "ios-hig-design",
+    "landing-page-audit",
+    "mobile-app-ui-design",
+    "onboarding-wizard-design",
+    "payload",
+    "stripe:*",
+    "frontend-design:*",
+    "impeccable:*",
+    "osmo:*",
+    "dezzign:*",
+    "hyperframes:*",
+    "figma:*",
+    "dataviz",
+    "anthropic-skills:pptx",
+    "anthropic-skills:xlsx",
+    "anthropic-skills:docx",
+    "anthropic-skills:google-workspace",
+    "anthropic-skills:morning",
+    "anthropic-skills:import-memory"
+  ],
+  "agents": [
+    "stripe:*"
+  ]
+}

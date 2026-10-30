@@ -996,6 +996,26 @@ void OLED::drawFilledRect(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, bool c
   }
 }
 
+#ifdef OLED_128x32_HERO_UI
+void OLED::invertRect(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1) {
+  if (x0 > x1 || y0 > y1 || x1 >= OLED_WIDTH || y1 >= OLED_HEIGHT) {
+    return;
+  }
+  for (uint8_t row = y0 / 8; row <= y1 / 8; row++) {
+    uint8_t mask = 0xFF;
+    if (row == y0 / 8) {
+      mask &= 0xFF << (y0 % 8);
+    }
+    if (row == y1 / 8) {
+      mask &= 0xFF >> (7 - (y1 % 8));
+    }
+    for (uint8_t x = x0; x <= x1; x++) {
+      stripPointers[row][x] ^= mask;
+    }
+  }
+}
+#endif
+
 void OLED::drawHeatSymbol(uint8_t state) {
   // Draw symbol 14
   // Then draw over it, the bottom 5 pixels always stay. 8 pixels above that are

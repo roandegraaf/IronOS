@@ -1,0 +1,4 @@
+#ifndef PREVIEW_FREERTOS_CONFIG_H
+#define PREVIEW_FREERTOS_CONFIG_H
+#define configTICK_RATE_HZ 1000
+#endif

@@ -3,6 +3,76 @@
 #include "ui_drawing.hpp"
 #include <OperatingModes.h>
 #ifdef OLED_128x32
+#if defined(OLED_128x32_HERO_UI)
+#include "hero_ui.hpp"
+
+// Positions are right-handed; hero_x() mirrors each element for left-handed mode.
+static constexpr int16_t kHeroX       = 2;
+static constexpr int16_t kTextRight   = 126;
+static constexpr uint8_t kWattsY      = 0;
+static constexpr uint8_t kSetpointY   = 16;
+static constexpr uint8_t kBarTop      = 26;
+static constexpr uint8_t kBarBottom   = OLED_HEIGHT - 1;
+static constexpr uint8_t kBarInset    = 2;
+static constexpr uint8_t kBarFillMaxW = OLED_WIDTH - 2 * kBarInset;
+static constexpr uint8_t kTiny2xW     = TINY_CHAR_W * 2;
+
+static void drawWatts(uint32_t x10Watt) {
+  const uint16_t watts  = x10Watt / 10;
+  const uint8_t  digits = hero_digit_count(watts);
+  const uint8_t  inkW   = (digits + 1) * kTiny2xW - 2; // 2x cells end in two blank columns
+  int16_t        x      = hero_x(kTextRight - inkW + 1, inkW);
+  uint16_t       scale  = 1;
+  for (uint8_t i = 1; i < digits; i++) {
+    scale *= 10;
+  }
+  for (; scale > 0; scale /= 10) {
+    ui_draw_tiny_char_2x(x, kWattsY, 2 + (watts / scale) % 10);
+    x += kTiny2xW;
+  }
+  ui_draw_tiny_char_2x(x, kWattsY, SmallSymbolWatts[0]);
+}
+
+static void drawSetpointAndVoltage(bool boostModeOn) {
+  const uint16_t setpoint = getSettingValue(boostModeOn ? SettingsOptions::BoostTemp : SettingsOptions::SolderingTemp);
+  const uint32_t voltX10  = getInputVoltageX10(getSettingValue(SettingsOptions::VoltageDiv), 0);
+  const uint8_t  digits   = hero_digit_count(setpoint);
+  const uint8_t  inkW     = HERO_SMALL_ICON_W + (digits + 2) * TINY_CHAR_W + tiny_voltage_width(voltX10) - 1;
+  const int16_t  x        = hero_x(kTextRight - inkW + 1, inkW);
+
+  ui_draw_hero_small_icon(x, kSetpointY, boostModeOn ? HeroIconBoost : HeroIconArrowRight);
+  OLED::setCursor(x + HERO_SMALL_ICON_W, kSetpointY);
+  OLED::printNumber(setpoint, digits, FontStyle::TINY);
+  OLED::print(SmallSymbolDegreeSign, FontStyle::TINY);
+  OLED::print(SmallSymbolSpace, FontStyle::TINY);
+  ui_draw_tiny_voltage(OLED::getCursorX(), kSetpointY, voltX10);
+}
+
+static void drawPowerBar(uint32_t x10Watt) {
+  const int32_t x10Limit = getX10WattageLimits();
+  uint32_t      len      = 0;
+  if (x10Limit > 0) {
+    len = (x10Watt * kBarFillMaxW) / (uint32_t)x10Limit;
+    if (len > kBarFillMaxW) {
+      len = kBarFillMaxW;
+    }
+  }
+  OLED::drawFilledRect(0, kBarTop, OLED_WIDTH - 1, kBarBottom, false);
+  OLED::drawFilledRect(1, kBarTop + 1, OLED_WIDTH - 2, kBarBottom - 1, true);
+  if (len) {
+    OLED::drawFilledRect(kBarInset, kBarTop + kBarInset, kBarInset + len - 1, kBarBottom - kBarInset, false);
+  }
+}
+
+void ui_draw_soldering_power_status(bool boostModeOn) {
+  const uint32_t x10Watt = x10WattHistory.average();
+  ui_draw_hero_live_temperature(kHeroX, HeroFaceShort);
+  drawWatts(x10Watt);
+  drawSetpointAndVoltage(boostModeOn);
+  drawPowerBar(x10Watt);
+}
+
+#else                       /* !OLED_128x32_HERO_UI */
 #ifdef OLED_128x32_DENSE_UI // dense layout + compact font, only on models with the flash for it (see Sequre configuration.h)
 
 /*
@@ -193,4 +263,5 @@ void ui_draw_soldering_power_status(bool boost_mode_on) {
   OLED::print(SmallSymbolVolts, FontStyle::SMALL);
 }
 #endif /* OLED_128x32_DENSE_UI */
+#endif /* OLED_128x32_HERO_UI */
 #endif

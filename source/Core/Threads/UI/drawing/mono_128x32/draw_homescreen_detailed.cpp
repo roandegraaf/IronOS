@@ -2,6 +2,55 @@
 #include "ui_drawing.hpp"
 #include <OperatingModes.h>
 #ifdef OLED_128x32
+#if defined(OLED_128x32_HERO_UI)
+#include "TipThermoModel.h"
+#include "hero_ui.hpp"
+
+// Positions are right-handed; hero_x() mirrors the hero, the divider and the row block as a whole for left-handed mode.
+static constexpr int16_t kHeroX       = 2;
+static constexpr int16_t kDividerX    = 72;
+static constexpr int16_t kRowsX       = 76;
+static constexpr uint8_t kRowsW       = OLED_WIDTH - kRowsX;
+static constexpr uint8_t kSourceChars = 2;
+// Rows keep to disjoint 8 px strips (0, 1-2, 3): an unaligned TINY glyph overwrites whole column bytes of both strips it touches.
+static constexpr uint8_t kSetRowY    = 0;
+static constexpr uint8_t kSourceRowY = 12;
+static constexpr uint8_t kHandleRowY = 24;
+
+static void drawTemperatureRow(int16_t blockX, uint8_t y, const char *label, uint16_t value) {
+  const uint8_t digits = hero_digit_count(value);
+  OLED::setCursor(blockX, y);
+  OLED::print(label, FontStyle::TINY);
+  OLED::setCursor(blockX + kRowsW - (digits + 1) * TINY_CHAR_W, y);
+  OLED::printNumber(value, digits, FontStyle::TINY);
+  OLED::print(SmallSymbolDegreeSign, FontStyle::TINY);
+}
+
+static void drawSourceRow(int16_t blockX) {
+  const uint32_t voltX10 = getInputVoltageX10(getSettingValue(SettingsOptions::VoltageDiv), 0);
+  OLED::setCursor(blockX, kSourceRowY);
+  OLED::print(PowerSourceNames[getPowerSourceNumber()], FontStyle::TINY, kSourceChars);
+  ui_draw_tiny_voltage(blockX + kRowsW - tiny_voltage_width(voltX10), kSourceRowY, voltX10);
+}
+
+static uint16_t handleTemperature() {
+  const int16_t           handleX10 = getHandleTemperature(0);
+  const TemperatureType_t handleC   = handleX10 > 0 ? handleX10 / 10 : 0;
+  return getSettingValue(SettingsOptions::TemperatureInF) ? TipThermoModel::convertCtoF(handleC) : handleC;
+}
+
+void ui_draw_homescreen_detailed(TemperatureType_t tipTemp) {
+  const int16_t blockX   = hero_x(kRowsX, kRowsW);
+  const int16_t dividerX = hero_x(kDividerX, 1);
+
+  ui_draw_hero_tip_temperature(kHeroX, tipTemp);
+  drawTemperatureRow(blockX, kSetRowY, SmallSymbolSetPoint, getSettingValue(SettingsOptions::SolderingTemp));
+  drawSourceRow(blockX);
+  drawTemperatureRow(blockX, kHandleRowY, SmallSymbolHandle, handleTemperature());
+  OLED::drawFilledRect(dividerX, 0, dividerX, OLED_HEIGHT - 1, false);
+}
+
+#else                       /* !OLED_128x32_HERO_UI */
 #ifdef OLED_128x32_DENSE_UI // dense layout + compact font, only on models with the flash for it (see Sequre configuration.h)
 
 extern uint8_t disconnectedTipF[sizeof(disconnectedTip)];
@@ -147,4 +196,5 @@ void ui_draw_homescreen_detailed(TemperatureType_t tipTemp) {
   }
 }
 #endif /* OLED_128x32_DENSE_UI */
+#endif /* OLED_128x32_HERO_UI */
 #endif

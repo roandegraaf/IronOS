@@ -159,6 +159,16 @@ def get_constants() -> List[Tuple[str, str]]:
         ("LargeSymbolSleep", "Zzz "),
         ("SmallSymbolSocketT12", "T12"),
         ("SmallSymbolSocketTS", "TS"),
+    ] + get_hero_ui_constants()
+
+
+def get_hero_ui_constants() -> List[Tuple[str, str]]:
+    # Row labels of the TS101 hero idle screen. Gated so other models keep their font tables unchanged.
+    if "OLED_128x32_HERO_UI" not in BUILD_MACROS:
+        return []
+    return [
+        ("SmallSymbolSetPoint", "SET"),
+        ("SmallSymbolHandle", "HND"),
     ]
 
 
@@ -832,9 +842,14 @@ def make_font_table_06_compact_cpp(
     dense status screens (FontStyle::TINY). Only the leading symbols the firmware prints
     in TINY are emitted (see rank_small_font_symbols); a symbol without a 6x8 glyph gets a
     blank cell so the table stays indexable."""
+    hero_glyphs = (
+        font_tables.get_hero_tiny_font_map()
+        if "OLED_128x32_HERO_UI" in BUILD_MACROS
+        else {}
+    )
     output_table = "const uint8_t USER_FONT_6x8_COMPACT[] = {\n"
     for i, sym in enumerate(sym_list[: tiny_font_symbol_count()]):
-        font_bytes = font_map.font06_maps.get(sym)
+        font_bytes = hero_glyphs.get(sym) or font_map.font06_maps.get(sym)
         if not font_bytes:
             font_bytes = bytes(6)
         output_table += f"{bytes_to_c_hex(font_bytes)}//0x{i + 2:X} -> {sym}\n"

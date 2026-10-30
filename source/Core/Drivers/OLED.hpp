@@ -141,6 +141,9 @@ public:
   static void        useSecondaryFramebuffer(bool useSecondary);
   static void        transitionScrollDown(const TickType_t viewEnterTime);
   static void        transitionScrollUp(const TickType_t viewEnterTime);
+#ifdef OLED_128x32_HERO_UI
+  static void invertRect(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1);
+#endif
 
 private:
   static bool checkDisplayBufferChecksum() {

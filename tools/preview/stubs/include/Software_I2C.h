@@ -1,0 +1,3 @@
+#ifndef PREVIEW_SOFTWARE_I2C_H
+#define PREVIEW_SOFTWARE_I2C_H
+#endif

@@ -57,6 +57,8 @@ extern const char *SmallSymbolVBus;
 extern const char *LargeSymbolSleep;
 extern const char *SmallSymbolSocketT12;
 extern const char *SmallSymbolSocketTS;
+extern const char *SmallSymbolSetPoint;
+extern const char *SmallSymbolHandle;
 
 extern const char *DebugMenu[];
 extern const char *AccelTypeNames[];
